@@ -21,15 +21,12 @@ class Snake:
     
     def __init__(self):
 
-        self.height = BLOCK_DIMENSION
-        self.width = BLOCK_DIMENSION
         self.x = SCREEN_WIDTH/2
-        self.y = SCREEN_HEIGHT - self.height - 2 * BLOCK_DIMENSION
+        self.y = SCREEN_HEIGHT - 2 * BLOCK_DIMENSION
         self.xdir = 0
         self.ydir = 0
         self.color = WHITE
-        self.body = [py.Rect(self.x, self.y, self.width, self.height),
-                    py.Rect(self.x, self.y + BLOCK_DIMENSION, self.width, self.height)]
+        self.body = [py.Rect(self.x, self.y, BLOCK_DIMENSION, BLOCK_DIMENSION)]
 
     def draw(self, screen):
         for body in self.body:
@@ -65,13 +62,24 @@ class Snake:
         oldHead = self.body[0]
         newHead = py.Rect(oldHead.x + self.xdir, oldHead.y + self.ydir, BLOCK_DIMENSION, BLOCK_DIMENSION)
         self.body.insert(0,newHead)
+
+    def crashCheck(self):
+
+        head = self.body[0]
+        # stop snake on colision with boundary
+        if head.x <= 0 or head.x >= (SCREEN_WIDTH - BLOCK_DIMENSION) or head.y <= 0 or head.y >= (SCREEN_HEIGHT - BLOCK_DIMENSION):
+            self.xdir = self.ydir = 0
+            return False
+
+        for body in self.body[1:]:
+            if head.x == body.x and head.y == body.y:
+                self.xdir = self.ydir = 0
+                return False
+        return True
     
     def update(self, food, screen, font):
                     
-        # stop snake on colision with boundary
-        if self.body[0].x <= 0 or self.body[0].x >= (SCREEN_WIDTH - self.width) or self.body[0].y <= 0 or self.body[0].y >= (SCREEN_HEIGHT - self.height):
-        
-            self.xdir = self.ydir = 0
+        if not self.crashCheck():
             return False
         
         if self.eat(food):
